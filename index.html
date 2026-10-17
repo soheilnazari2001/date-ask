@@ -53,20 +53,27 @@
   h1{font-size:clamp(29px,8vw,42px);line-height:1.28;font-weight:600;max-width:430px}
   h1 .hl{color:var(--gold-deep)}
   .sub{margin-top:12px;color:var(--ink-soft);font-size:15px;font-style:italic;max-width:330px}
-  .orn{margin:22px 0 4px;color:var(--gold);letter-spacing:10px;font-size:13px;user-select:none}
+  .compliment{
+    margin-top:10px;color:var(--gold-deep);font-style:italic;font-size:14px;
+    max-width:320px;min-height:20px;
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .compliment.fade{opacity:0;transform:translateY(4px)}
+  .orn{margin:22px 0 4px;color:var(--gold);letter-spacing:8px;font-size:13px;opacity:.85;user-select:none}
 
   .btns{display:flex;gap:18px;align-items:center;justify-content:center;margin-top:30px;flex-wrap:wrap}
   .btn{font-family:inherit;font-size:19px;padding:15px 44px;border-radius:999px;cursor:pointer;white-space:nowrap}
   .yes{
     background:linear-gradient(135deg,#e8a33d,#b35f14);
     color:#fff8ec;border:none;
-    box-shadow:0 10px 26px rgba(179,95,20,.35);
+    box-shadow:0 8px 22px rgba(179,95,20,.28);
     animation:beat 2.2s ease-in-out infinite;
   }
-  @keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.05)}16%{transform:scale(1)}}
+  @keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.03)}16%{transform:scale(1)}}
   .no{
-    background:transparent;border:2px solid var(--line);color:var(--ink-soft);
-    transition:left .18s ease, top .18s ease, transform .18s ease;
+    background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);
+    font-style:italic;letter-spacing:.3px;
+    transition:left .5s cubic-bezier(.33,1,.68,1), top .5s cubic-bezier(.33,1,.68,1), transform .5s ease, opacity .5s ease;
     min-width:118px;
   }
 
@@ -96,7 +103,8 @@
   .chip.selected .fa,.chip.selected .k-sub{color:#ffe9c4}
 
   .card{
-    background:var(--card);border:1.5px solid var(--line);border-radius:22px;
+    background:var(--card);border:1.5px solid rgba(150,105,40,.32);border-radius:22px;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     padding:26px 22px;width:100%;max-width:340px;margin-top:22px;
     box-shadow:0 12px 32px rgba(150,95,30,.14);
   }
@@ -106,6 +114,7 @@
   .card .row.first{border-top:none}
   .card .row .fa{font-size:12px;color:var(--ink-soft);margin-left:2px}
   .card .plan{margin-top:12px;font-style:italic;color:var(--ink-soft);font-size:14px}
+  .card #done-comp{margin-top:6px;color:var(--gold-deep)}
 
   .send-cap{margin-top:30px;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft)}
   .send-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center}
@@ -140,6 +149,7 @@
     <div class="script kick" id="ask-kick"></div>
     <h1 id="ask-h1"></h1>
     <p class="sub">a little autumn question, asked with a racing heart 🍂</p>
+    <p class="compliment" id="compliment-line">you make autumn look even warmer 🍂</p>
     <div class="orn">✦ · 🍂 · ✦</div>
     <div class="btns">
       <button class="btn yes" id="yes-btn">Yes 💛</button>
@@ -172,6 +182,7 @@
       <div class="row first"><span id="done-day"></span><span class="fa" id="done-day-fa"></span></div>
       <div class="row"><span id="done-kind"></span></div>
       <p class="plan" id="done-plan"></p>
+      <p class="plan" id="done-comp"></p>
     </div>
     <div class="send-cap">tell Soheil your answer 💌</div>
     <div class="send-row">
@@ -202,6 +213,13 @@ const KINDS = [
 ];
 const LEAVES = ['🍁','🍂','🍃','🍁','🍂'];
 const RAIN  = ['💛','🧡','✨','💖','🍂'];
+const COMPLIMENTS = [
+  'you make autumn look even warmer 🍂',
+  'that smile could stop a falling leaf mid-air',
+  'golden hour gets jealous of you',
+  'the leaves fall slower just to watch you walk by',
+  'you glow like candlelight in October',
+];
 
 const state = { day:null, kind:null };
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
@@ -276,32 +294,59 @@ document.getElementById('ask-kick').textContent = `for ${CONFIG.herName},`;
 const h1 = document.getElementById('ask-h1');
 h1.innerHTML = `${CONFIG.herName}, <span class="hl">${CONFIG.question}</span>`;
 
+/* rotating compliments */
+const compEl = document.getElementById('compliment-line');
+let compIdx = 0;
+setInterval(() => {
+  compEl.classList.add('fade');
+  setTimeout(() => {
+    compIdx = (compIdx + 1) % COMPLIMENTS.length;
+    compEl.textContent = COMPLIMENTS[compIdx];
+    compEl.classList.remove('fade');
+  }, 450);
+}, 4600);
+
 const yesBtn = document.getElementById('yes-btn');
 const noBtn  = document.getElementById('no-btn');
 let escapes = 0, lastDodge = 0;
 
 function dodge(e){
-  if(Date.now() - lastDodge < 250) return;
+  if(Date.now() - lastDodge < 300) return;
   lastDodge = Date.now();
   escapes++;
   const rect = noBtn.getBoundingClientRect();
-  const pad = 16;
-  const maxX = Math.max(pad, innerWidth  - rect.width  - pad);
-  const maxY = Math.max(pad, innerHeight - rect.height - pad);
-  const px = e && e.clientX ? e.clientX : innerWidth/2;
-  const py = e && e.clientY ? e.clientY : innerHeight/2;
-  let x, y, tries = 0;
-  do{
-    x = pad + Math.random()*(maxX-pad);
-    y = pad + Math.random()*(maxY-pad);
-    tries++;
-  }while(tries < 30 && Math.hypot(x+rect.width/2-px, y+rect.height/2-py) < 150);
-  noBtn.style.position = 'fixed';
-  noBtn.style.left = x+'px';
-  noBtn.style.top  = y+'px';
-  noBtn.style.transform = `scale(${Math.max(.62, 1-escapes*.045)}) rotate(${(Math.random()*10-5).toFixed(1)}deg)`;
+  const pad = 14;
+  const px = e && e.clientX ? e.clientX : rect.left + rect.width/2;
+  const py = e && e.clientY ? e.clientY : rect.top + rect.height/2;
+  const ang = Math.random()*Math.PI*2;
+  const step = 96 + Math.random()*48;
+  let dx = Math.cos(ang)*step, dy = Math.sin(ang)*step;
+  let nx = rect.left + dx, ny = rect.top + dy;
+  nx = Math.min(Math.max(pad, nx), Math.max(pad, innerWidth  - rect.width  - pad));
+  ny = Math.min(Math.max(pad, ny), Math.max(pad, innerHeight - rect.height - pad));
+  // never land under her finger — mirror if needed
+  if(Math.hypot(nx + rect.width/2 - px, ny + rect.height/2 - py) < 90){
+    nx = rect.left - dx; ny = rect.top - dy;
+    nx = Math.min(Math.max(pad, nx), Math.max(pad, innerWidth  - rect.width  - pad));
+    ny = Math.min(Math.max(pad, ny), Math.max(pad, innerHeight - rect.height - pad));
+  }
+  const scale = Math.max(.88, 1 - escapes*.012);
+  if(noBtn.style.position !== 'fixed'){
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = rect.left+'px';
+    noBtn.style.top  = rect.top+'px';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      noBtn.style.left = nx+'px';
+      noBtn.style.top  = ny+'px';
+      noBtn.style.transform = `scale(${scale})`;
+    }));
+  }else{
+    noBtn.style.left = nx+'px';
+    noBtn.style.top  = ny+'px';
+    noBtn.style.transform = `scale(${scale})`;
+  }
   noBtn.textContent = NO_LABELS[Math.min(escapes-1, NO_LABELS.length-1)];
-  yesBtn.style.transform = `scale(${1 + Math.min(.3, escapes*.02)})`;
+  yesBtn.style.transform = `scale(${1 + Math.min(.1, escapes*.006)})`;
   if(e && e.type === 'touchstart') e.preventDefault();
 }
 noBtn.addEventListener('pointerdown', dodge);
@@ -382,6 +427,7 @@ function buildDone(){
   document.getElementById('done-plan').textContent = k.title === 'Surprise me'
     ? `I'll plan everything. — ${CONFIG.yourName} 💛`
     : `I'll plan the rest. — ${CONFIG.yourName} 💛`;
+  document.getElementById('done-comp').textContent = pick(COMPLIMENTS);
   msgText = `${CONFIG.herName} said YES 🎉 — ${dayLabel(d)} · ${k.title}. See you there 💛 — ${CONFIG.herName}`;
 }
 
