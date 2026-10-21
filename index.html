@@ -42,7 +42,9 @@
   #app{position:relative;z-index:1}
   .screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:64px 22px 44px}
   .screen.active{display:flex}
-  .screen.active > *{animation:rise .5s ease both}
+  .screen.active > *:not(.btns){animation:rise .5s ease both}
+  .screen.active > .btns{animation:rise-fade .5s ease .28s both}
+  @keyframes rise-fade{from{opacity:0}to{opacity:1}}
   .screen.active > *:nth-child(2){animation-delay:.07s}
   .screen.active > *:nth-child(3){animation-delay:.14s}
   .screen.active > *:nth-child(4){animation-delay:.21s}
@@ -473,7 +475,17 @@ function fallbackCopy(t){
 }
 
 /* ---------- back buttons ---------- */
-document.getElementById('back-day').addEventListener('click', () => show('screen-ask'));
+document.getElementById('back-day').addEventListener('click', () => {
+  noBtn.style.display = '';
+  noBtn.style.position = '';
+  noBtn.style.left = '';
+  noBtn.style.top = '';
+  noBtn.style.transform = '';
+  noBtn.textContent = 'no';
+  escapes = 0;
+  yesBtn.style.transform = '';
+  show('screen-ask');
+});
 document.getElementById('back-kind').addEventListener('click', () => show('screen-day'));
 
 /* ---------- celebration rain on done ---------- */
