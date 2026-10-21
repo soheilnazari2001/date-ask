@@ -74,7 +74,8 @@
     background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);
     font-style:italic;letter-spacing:.3px;
     transition:left .5s cubic-bezier(.33,1,.68,1), top .5s cubic-bezier(.33,1,.68,1), transform .5s ease, opacity .5s ease;
-    min-width:118px;
+    font-size:15px;padding:11px 26px;
+    min-width:86px;
   }
 
   .h2{font-size:30px;color:var(--gold-deep);margin-bottom:6px}
@@ -186,7 +187,7 @@
     </div>
     <div class="send-cap">tell Soheil your answer 💌</div>
     <div class="send-row">
-      <button class="send" id="send-tg">Telegram ✈️</button>
+      <button class="send" id="send-tg">Send to Soheil ✈️</button>
       <button class="send" id="send-wa">WhatsApp 💬</button>
       <button class="send" id="send-cp">Copy 📋</button>
     </div>
@@ -200,6 +201,7 @@ const CONFIG = {
   herName: 'Proshat',
   yourName: 'Soheil',
   question: 'will you go on a date with me?',
+  telegram: 'iamsoheilnazari',
 };
 
 const NO_LABELS = ['no', 'nice try', 'not a chance', 'hmm 😏', 'so close', 'just press yes 💛'];
@@ -319,7 +321,7 @@ function dodge(e){
   const px = e && e.clientX ? e.clientX : rect.left + rect.width/2;
   const py = e && e.clientY ? e.clientY : rect.top + rect.height/2;
   const ang = Math.random()*Math.PI*2;
-  const step = 96 + Math.random()*48;
+  const step = 30;
   let dx = Math.cos(ang)*step, dy = Math.sin(ang)*step;
   let nx = rect.left + dx, ny = rect.top + dy;
   nx = Math.min(Math.max(pad, nx), Math.max(pad, innerWidth  - rect.width  - pad));
@@ -351,6 +353,7 @@ function dodge(e){
 }
 noBtn.addEventListener('pointerdown', dodge);
 noBtn.addEventListener('touchstart', dodge, { passive:false });
+noBtn.addEventListener('click', e => { if(Date.now() - lastDodge < 500) e.preventDefault(); });
 addEventListener('resize', () => {
   if(noBtn.style.position !== 'fixed') return;
   const r = noBtn.getBoundingClientRect();
@@ -434,7 +437,9 @@ function buildDone(){
 /* ---------- send answer ---------- */
 const enc = encodeURIComponent;
 function send(ch){
-  if(ch === 'tg') location.href = 'https://t.me/share/url?url=' + enc(location.href) + '&text=' + enc(msgText);
+  if(ch === 'tg'){
+    copyText(msgText).then(() => { location.href = 'https://t.me/' + CONFIG.telegram; });
+  }
   if(ch === 'wa') location.href = 'https://wa.me/?text=' + enc(msgText);
   if(ch === 'cp'){
     const btn = document.getElementById('send-cp');
