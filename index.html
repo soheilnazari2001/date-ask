@@ -323,7 +323,7 @@ function dodge(e){
   const px = e && e.clientX ? e.clientX : rect.left + rect.width/2;
   const py = e && e.clientY ? e.clientY : rect.top + rect.height/2;
   const ang = Math.random()*Math.PI*2;
-  const step = 30;
+  const step = 60;
   let dx = Math.cos(ang)*step, dy = Math.sin(ang)*step;
   let nx = rect.left + dx, ny = rect.top + dy;
   nx = Math.min(Math.max(pad, nx), Math.max(pad, innerWidth  - rect.width  - pad));
